@@ -24,6 +24,7 @@ const IMG_PAUSE = safari.extension.baseURI + 'images/pause_64x64.png';
 const IMG_FULL = safari.extension.baseURI + 'images/fullscreen_64x64.png';
 const IMG_EXIT_FULL = safari.extension.baseURI + 'images/exit_fullscreen_64x64.png';
 const IMG_CLOSE = safari.extension.baseURI + 'images/close_64x64.png';
+const IMG_DOWNLOAD = safari.extension.baseURI + 'images/download_64x64.png';
 
 var settings = {
     min_image_width                 : null,
@@ -308,6 +309,7 @@ var spider = {
                             if(callback)
                                 callback(src);
                         }
+                        $(this).remove();
                     });
             }
             else {
@@ -321,7 +323,6 @@ var spider = {
         }
     },
 };
-
 
 
 var uiController = {
@@ -376,7 +377,7 @@ var uiController = {
 
             
             this.controller = $('<div></div>')
-                .css('width', '492px')
+                .css('width', '588px')
                 .css('height', '96px')
                 .css('border', '1px solid #444444')
                 .css('border-radius', '4px')
@@ -414,29 +415,36 @@ var uiController = {
                     uiController.toggleSlideshow();
                 });
             
-            /* Note: as of early Safari 5.1, full-screen mode is poorly documented and doesn't seem
-             * to work everywhere.  The elements used to request and cancel full screen were
-             * attained mostly by trial and error and seem to work consistently */
-			if(document.documentElement.webkitRequestFullScreen) {
-				$('<div class="pg_fullscreen_btn"><img src="' + IMG_FULL + '"></div>')
-	                .css('float', 'left')
-	                .css('padding', '16px')
-	                .appendTo(this.controller)
-	                .click(function() {
-	                    uiController.resetAutohideTimer();
-	                    if(document.webkitIsFullScreen) {
-	                        document.webkitCancelFullScreen();
-	                        $(this).find('img').attr('src', IMG_FULL);
-	                    }
-	                    else {
-	                        document.documentElement.webkitRequestFullScreen();
-	                        $(this).find('img').attr('src', IMG_EXIT_FULL);
-	                    }
-	                });
-			}
-			else {
-				this.controller.css('width', '396px');
-			}
+			$('<div class="pg_fullscreen_btn"><img src="' + IMG_FULL + '"></div>')
+                .css('float', 'left')
+                .css('padding', '16px')
+                .appendTo(this.controller)
+                .click(function() {
+                    uiController.resetAutohideTimer();
+                    if(document.webkitIsFullScreen) {
+                        document.webkitCancelFullScreen();
+                        $(this).find('img').attr('src', IMG_FULL);
+                    }
+                    else {
+                        document.documentElement.webkitRequestFullScreen();
+                        $(this).find('img').attr('src', IMG_EXIT_FULL);
+                    }
+                });
+
+            $('<div><img src="' + IMG_DOWNLOAD + '"></div>')
+                .css('float', 'left')
+                .css('padding', '16px')
+                .appendTo(this.controller)
+                .click(function() {
+                    var pf = (document.title || 'Web').substring(0, 20) + ' Image ';
+                    spider.pending_download = spider.matched_images.length;
+                    safari.self.tab.dispatchMessage("setBadge", spider.pending_download);
+                    spider.matched_images.forEach(function(u, i){
+                        var r = u.match(/(.*?)(\.\w+)$/);
+                        var fn = pf + (1+i) + (r ? r[2] : '.jpg');
+                        safari.self.tab.dispatchMessage("downloadLink", {name: fn, url:u});
+                    })
+                });
 
             $('<div><img src="' + IMG_CLOSE + '"></div>')
                 .css('float', 'left')
@@ -474,6 +482,7 @@ var uiController = {
 					else {
 //						alert(event.keyCode);
 					}
+                    event.preventDefault();
 				}
             });
             
@@ -702,6 +711,16 @@ function respondToMessage(event) {
                 spider.pending_image_count--;
             });
         }
+    }
+    else if(event.name === 'triggerDownload') {
+        var anchor = document.createElement('a');
+        document.body.appendChild(anchor);
+        anchor.href = event.message.data;
+        anchor.download = event.message.name;
+        anchor.click();
+        document.body.removeChild(anchor);
+        spider.pending_download--;
+        safari.self.tab.dispatchMessage("setBadge", spider.pending_download);
     }
 }
 safari.self.addEventListener("message", respondToMessage, false);

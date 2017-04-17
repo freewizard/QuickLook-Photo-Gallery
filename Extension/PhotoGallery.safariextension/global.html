@@ -2,7 +2,7 @@
 <html>
     <head>
         <script src="scripts/jquery.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript" charset="utf-8">            
+        <script type="text/javascript" charset="utf-8">        
             function togglePreview(event) {
                 safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("togglePreview", {
                     min_image_width : safari.extension.settings.min_image_width,
@@ -38,6 +38,25 @@
                                 page.dispatchMessage("completedLoadingUrl", url);
                         });
                     }
+                } else if (event.name === "setBadge") {
+                    console.log("setBadge "+event.message);
+                    for (var i=0; i < safari.extension.toolbarItems.length; i++) {
+                        safari.extension.toolbarItems[i].badge = event.message;
+                    };
+                } else if (event.name === "downloadLink") {
+                    console.log("downloadLink");
+                    var img = new Image();
+                    img.onload = function () {
+                        console.log("onLoad");
+                        var canvas = document.createElement("canvas");
+                        canvas.width =this.width;
+                        canvas.height =this.height;
+                        var ctx = canvas.getContext("2d");
+                        ctx.drawImage(this, 0, 0);
+                        var dataURL = canvas.toDataURL("image/png");
+                        safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("triggerDownload", {name: event.message.name, data:dataURL});
+                    };
+                    img.src = event.message.url;
                 }
             }
             

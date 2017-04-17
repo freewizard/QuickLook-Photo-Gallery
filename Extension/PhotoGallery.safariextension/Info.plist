@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Matt Goatcher</string>
 	<key>Builder Version</key>
-	<string>7534.57.2</string>
+	<string>12603.1.30.0.34</string>
 	<key>CFBundleDisplayName</key>
 	<string>QuickLook Photo Gallery</string>
 	<key>CFBundleIdentifier</key>
@@ -13,9 +13,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1</string>
+	<string>1.2</string>
 	<key>CFBundleVersion</key>
-	<string>1.1</string>
+	<string>1.2</string>
 	<key>Chrome</key>
 	<dict>
 		<key>Global Page</key>
@@ -26,13 +26,13 @@
 				<key>Command</key>
 				<string>togglePreview</string>
 				<key>Identifier</key>
-				<string>gallery</string>
+				<string>toggleGallery</string>
 				<key>Image</key>
 				<string>images/icon.png</string>
 				<key>Label</key>
 				<string>Gallery</string>
 				<key>Tool Tip</key>
-				<string>Display Gallery</string>
+				<string>Toggle Gallery</string>
 			</dict>
 		</array>
 	</dict>
@@ -49,6 +49,8 @@
 	</dict>
 	<key>Description</key>
 	<string>Displays a quick-look style preview of all images on the page.</string>
+	<key>DeveloperIdentifier</key>
+	<string>0000000000</string>
 	<key>ExtensionInfoDictionaryVersion</key>
 	<string>1.0</string>
 	<key>Permissions</key>
